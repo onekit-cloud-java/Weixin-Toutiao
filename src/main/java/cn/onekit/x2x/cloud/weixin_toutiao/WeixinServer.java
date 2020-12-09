@@ -352,7 +352,6 @@ public abstract class WeixinServer implements WeixinAPI {
         tt_body.setPath(wx_body.getPath());
         tt_body.setWidth(wx_body.getWidth());
 
-
         try {
             return toutiaoSDK.apps__qrcode(tt_body);
         } catch (ToutiaoError toutiaoError) {
