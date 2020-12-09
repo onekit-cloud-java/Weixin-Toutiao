@@ -1,10 +1,10 @@
 package cn.onekit.x2x.cloud.weixin_toutiao;
 
 
-import cn.onekit.thekit.JSON;
+
+import cn.onekit.thekit.FileDB;
 import com.qq.weixin.api.WeixinAPI;
 import com.qq.weixin.api.entity.*;
-import com.qq.weixin.api.entity.KV;
 import com.toutiao.developer.ToutiaoSDK;
 import com.toutiao.developer.ToutiaoSDK2;
 import com.toutiao.developer.entity.*;
@@ -20,16 +20,16 @@ public abstract class WeixinServer implements WeixinAPI {
     private ToutiaoSDK toutiaoSDK = new ToutiaoSDK("https://developer.toutiao.com");
     private ToutiaoSDK2 toutiaoSDK2 = new ToutiaoSDK2("https://developer.toutiao.com");
 
+    @SuppressWarnings("WeakerAccess")
     public WeixinServer(String tt_appid, String tt_secret) {
         this.tt_appid = tt_appid;
         this.tt_secret = tt_secret;
     }
-    private final String tt_sig_method = "hmac_sha256";
 
     abstract protected void _code_openid(String tt_code, String tt_openid);
-    abstract protected String _code_openid(String tt_code);
+    abstract protected FileDB.Data _code_openid(String tt_code);
     abstract protected void _openid_sessionkey(String tt_openid, String tt_sessionkey);
-    abstract protected String _openid_sessionkey(String tt_openid);
+    abstract protected FileDB.Data _openid_sessionkey(String tt_openid);
 
     @Override
     public cgi_bin__token_response cgi_bin__token(String wx_grant_type, String wx_appid, String wx_secret) throws WeixinError {
@@ -61,23 +61,24 @@ public abstract class WeixinServer implements WeixinAPI {
     public snc__jscode2session_response snc__jscode2session(String wx_appid, String wx_secret, String wx_js_code, String wx_grant_type) {
         snc__jscode2session_response wx_response = new snc__jscode2session_response();
         try {
-            String tt_openid = _code_openid(wx_js_code);
-            String tt_session_key;
-            if(tt_openid!=null){
-                tt_session_key = _openid_sessionkey(tt_openid);
-                wx_response.setOpenid(tt_openid);
-                wx_response.setSession_key(tt_session_key);
+            FileDB.Data tt_openid_data = _code_openid(wx_js_code);
+            FileDB.Data tt_session_key_data = null;
+            if(tt_openid_data!=null){
+                tt_session_key_data = _openid_sessionkey(tt_openid_data.value);
+                wx_response.setOpenid(tt_openid_data.value);
+                wx_response.setSession_key(tt_session_key_data.value);
                 return wx_response;
             }
             apps__jscode2session_response tt_response = toutiaoSDK.apps__jscode2session(tt_appid, tt_secret, wx_js_code, null);
 
-            tt_openid = tt_response.getOpenid();
-            tt_session_key = tt_response.getSession_key();
-            _code_openid(wx_js_code,tt_openid);
-            _openid_sessionkey(tt_openid,tt_session_key);
+            assert false;
+            tt_openid_data.value = tt_response.getOpenid();
+            tt_session_key_data.value = tt_response.getSession_key();
+            _code_openid(wx_js_code,tt_openid_data.value);
+            _openid_sessionkey(tt_openid_data.value,tt_session_key_data.value);
 
-            wx_response.setOpenid(tt_openid);
-            wx_response.setSession_key(tt_session_key);
+            wx_response.setOpenid(tt_openid_data.value);
+            wx_response.setSession_key(tt_session_key_data.value);
             return wx_response;
         } catch (ToutiaoError toutiaoError) {
             toutiaoError.printStackTrace();
@@ -90,6 +91,7 @@ public abstract class WeixinServer implements WeixinAPI {
 
 
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public WeixinResponse wxa__img_sec_check(String wx_access_token, byte[] wx_body) {
         WeixinResponse wx_response = new WeixinResponse();
@@ -132,12 +134,14 @@ public abstract class WeixinServer implements WeixinAPI {
         return wx_response;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public wxa__media_check_async_response wxa__media_check_async(String wx_access_token, wxa__media_check_async_body wx_body) {
 
         wxa__media_check_async_response wx_response = new wxa__media_check_async_response();
 
         try {
+
             tags__image_body tt_body = new tags__image_body();
 
             ArrayList<tags__image_body.Target> targets = new ArrayList<>();
@@ -174,6 +178,7 @@ public abstract class WeixinServer implements WeixinAPI {
         return wx_response;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public WeixinResponse wxa__msg_sec_check(String wx_access_token, wxa__msg_sec_check_body wx_body) {
         WeixinResponse wx_response = new WeixinResponse();
@@ -208,7 +213,7 @@ public abstract class WeixinServer implements WeixinAPI {
         return wx_response;
     }
 
-    @Override
+   /* @Override
     public WeixinResponse wxa__remove_user_storage(String wx_access_token, String wx_openid, String wx_signature, String wx_sig_method, wxa__remove_user_storage_body wx_body) {
         WeixinResponse wx_response = new WeixinResponse();
         apps__remove_user_storage_body tt_body = new apps__remove_user_storage_body();
@@ -315,8 +320,9 @@ public abstract class WeixinServer implements WeixinAPI {
     @Override
     public WeixinResponse cgi_bin__message__wxopen__updatablemsg__send(String wx_access_token, updatablemsg__send_body wx_body) {
         return null;
-    }
+    }*/
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public byte[] cgi_bin__wxaapp__createwxaqrcode(String wx_access_token, wxaapp__createwxaqrcode_body wx_body) throws WeixinError {
 
@@ -337,6 +343,7 @@ public abstract class WeixinServer implements WeixinAPI {
         }
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public byte[] wxa__getwxacode(String wx_access_token, wxa__getwxacode_body wx_body) throws WeixinError {
         apps__qrcode_body tt_body = new apps__qrcode_body();
@@ -375,7 +382,7 @@ public abstract class WeixinServer implements WeixinAPI {
     }
 
     @Override
-    public WeixinResponse cgi_bin__message__subscribe__send(String wx_access_token, subscribe__send_body wx_body) {
+    public WeixinResponse cgi_bin__message__subscribe__send(String wx_access_token, cgi_bin__message__subscribe__send_body wx_body) {
         WeixinResponse wx_response = new WeixinResponse();
         try {
             Subscribe2Subscribe subscribe2subscribe=new Subscribe2Subscribe();
@@ -387,10 +394,10 @@ public abstract class WeixinServer implements WeixinAPI {
             tt_body.setOpen_id(wx_body.getTouser());
 
             HashMap<String, String> key2key = subscribe2subscribe.id2keys(wx_body.getTemplate_id());
-            HashMap<String, subscribe__send_body.Data.DataValue> wx_data = wx_body.getData();
-            for (Map.Entry<String, subscribe__send_body.Data.DataValue> entry : wx_data.entrySet()) {
+            HashMap<String, cgi_bin__message__subscribe__send_body.Data.DataValue> wx_data = wx_body.getData();
+            for (Map.Entry<String, cgi_bin__message__subscribe__send_body.Data.DataValue> entry : wx_data.entrySet()) {
                 String key = entry.getKey();
-                subscribe__send_body.Data.DataValue dataValue = entry.getValue();
+                cgi_bin__message__subscribe__send_body.Data.DataValue dataValue = entry.getValue();
                 key2key.put(key,dataValue.getValue());
             }
             tt_body.setData(key2key);

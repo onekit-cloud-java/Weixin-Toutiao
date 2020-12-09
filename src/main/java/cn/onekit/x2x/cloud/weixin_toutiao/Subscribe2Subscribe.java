@@ -593,11 +593,13 @@ public class Subscribe2Subscribe implements ApplicationContextAware {
         }});
     }};
 
+    @SuppressWarnings("WeakerAccess")
     public  HashMap<String,String> id2keys(String wx_template_id){
         String wx_template_name = applicationContext.getEnvironment().getProperty(String.format("%s_name",wx_template_id));
     return keys2keys.get(wx_template_name);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public  String id2id(String wx_template_id){
         return applicationContext.getEnvironment().getProperty(wx_template_id);
     }

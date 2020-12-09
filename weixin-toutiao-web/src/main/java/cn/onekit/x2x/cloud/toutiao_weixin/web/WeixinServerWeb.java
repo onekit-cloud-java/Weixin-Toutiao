@@ -1,12 +1,13 @@
 package cn.onekit.x2x.cloud.toutiao_weixin.web;
 
-import cn.onekit.thekit.DB;
+
+import cn.onekit.thekit.FileDB;
 import cn.onekit.thekit.JSON;
 import cn.onekit.x2x.cloud.weixin_toutiao.WeixinServer;
 import com.qq.weixin.api.entity.*;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+
 
 
 @RestController
@@ -19,22 +20,22 @@ private WeixinServer _weixinServer;
             _weixinServer = new WeixinServer(ToutiaoAccount.tt_appid, ToutiaoAccount.tt_secret) {
                 @Override
                 protected void _code_openid(String tt_code, String tt_openid) {
-                    DB.set("[weixin-toutiao] code_openid", tt_code, tt_openid);
+                    FileDB.set("[weixin-toutiao] code_openid", tt_code, tt_openid);
                 }
 
                 @Override
-                protected String _code_openid(String tt_code) {
-                    return DB.get("[weixin-toutiao] code_openid", tt_code);
+                protected FileDB.Data _code_openid(String tt_code) {
+                    return FileDB.get("[weixin-toutiao] code_openid", tt_code);
                 }
 
                 @Override
                 protected void _openid_sessionkey(String tt_openid, String tt_sessionkey) {
-                    DB.set("[weixin-toutiao] openid_sessionkey", tt_openid, tt_sessionkey);
+                    FileDB.set("[weixin-toutiao] openid_sessionkey", tt_openid, tt_sessionkey);
                 }
 
                 @Override
-                protected String _openid_sessionkey(String tt_openid) {
-                    return DB.get("[weixin-toutiao] openid_sessionkey", tt_openid);
+                protected FileDB.Data _openid_sessionkey(String tt_openid) {
+                    return FileDB.get("[weixin-toutiao] openid_sessionkey", tt_openid);
                 }
             };
         }
@@ -115,7 +116,7 @@ private WeixinServer _weixinServer;
             return JSON.object2string(weixinError);
         }
     }
-    @RequestMapping(method =RequestMethod.POST,value = "/wxa/remove_user_storage")
+    /*@RequestMapping(method =RequestMethod.POST,value = "/wxa/remove_user_storage")
     public String removeUserStorage(
             HttpServletRequest request,
             @RequestBody String wx_body
@@ -150,7 +151,7 @@ private WeixinServer _weixinServer;
             weixinError.setErrmsg(errror.getMessage());
             return JSON.object2string(weixinError);
         }
-    }
+    }*/
     @RequestMapping(method =RequestMethod.POST,value = "/cgi-bin/wxaapp/createwxaqrcode")
     public byte[] createQRCode(
             @RequestParam String access_token,
@@ -202,7 +203,7 @@ private WeixinServer _weixinServer;
             @RequestBody String wx_body
     ) {
         try {
-            return JSON.object2string(weixinServer().cgi_bin__message__subscribe__send(access_token, JSON.string2object(wx_body, subscribe__send_body.class)));
+            return JSON.object2string(weixinServer().cgi_bin__message__subscribe__send(access_token, JSON.string2object(wx_body, cgi_bin__message__subscribe__send_body.class)));
         } catch (Exception errror) {
             WeixinError weixinError = new WeixinError();
             weixinError.setErrcode(500);
